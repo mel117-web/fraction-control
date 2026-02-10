@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Fraction Flow</title>
+<style>
+body { margin:0; font-family:Arial; background:#0f172a; color:white; text-align:center; }
+.screen { display:none; padding:40px; }
+.active { display:block; }
+button { padding:12px 20px; font-size:16px; cursor:pointer; border:none; border-radius:6px; background:#38bdf8; }
+#hud { display:flex; justify-content:space-around; margin-bottom:15px; }
+#barContainer { width:80%; height:40px; background:#1e293b; margin:20px auto; border-radius:20px; overflow:hidden; }
+#bar { height:100%; width:0%; background:#22c55e; transition:width 0.1s; }
+#target { font-size:20px; margin-top:10px; }
+.star { color:gold; font-size:22px; }
+</style>
+</head>
+<body>
+
+<div id="start" class="screen active">
+  <h1>Fraction Flow</h1>
+  <p>Control the flow and stop at the correct fraction!</p>
+  <button onclick="startGame()">Start Game</button>
+</div>
+
+<div id="game" class="screen">
+  <div id="hud">
+    <div>⏱ <span id="time">30</span></div>
+    <div>⭐ <span id="points">0</span></div>
+    <div>Level <span id="level">1</span></div>
+  </div>
+
+  <div id="barContainer">
+    <div id="bar"></div>
+  </div>
+
+  <div id="target">Target: <b><span id="fraction"></span></b></div>
+  <br>
+  <button onmousedown="fill=true" onmouseup="stopFill()">Hold to Fill</button>
+</div>
+
+<div id="end" class="screen">
+  <h2>Time's Up!</h2>
+  <p>Score: <span id="finalScore"></span></p>
+  <p id="stars"></p>
+  <button onclick="location.reload()">Play Again</button>
+</div>
+
+<div id="finish" class="screen">
+  <h2>🎉 All Levels Completed!</h2>
+  <p>Final Score: <span id="finalScore2"></span></p>
+  <button onclick="location.reload()">Restart</button>
+</div>
+
+<script>
+let fill=false, width=0, points=0, time=30, timer;
+let level=1, maxLevel=4;
+let targetFraction;
+
+function randomFraction() {
+  let denom = level + 2;
+  let num = Math.floor(Math.random() * (denom - 1)) + 1;
+  return { num, denom, value: (num/denom)*100 };
+}
+
+function startGame() {
+  show('game');
+  nextLevel();
+  timer = setInterval(() => {
+    time--;
+    document.getElementById('time').textContent = time;
+    if (time <= 0) endGame();
+  }, 1000);
+}
+
+function nextLevel() {
+  if (level > maxLevel) return finishGame();
+  document.getElementById('level').textContent = level;
+  targetFraction = randomFraction();
+  document.getElementById('fraction').textContent = `${targetFraction.num}/${targetFraction.denom}`;
+}
+
+setInterval(() => {
+  if (fill) {
+    width += 0.5 + level * 0.2;
+    if (width >= 100) width = 100;
+    document.getElementById('bar').style.width = width + '%';
+  }
+}, 30);
+
+function stopFill() {
+  fill = false;
+  let diff = Math.abs(width - targetFraction.value);
+  if (diff < 5) {
+    points += 20;
+    level++;
+    nextLevel();
+  } else {
+    points = Math.max(0, points - 5);
+  }
+  width = 0;
+  document.getElementById('bar').style.width = '0%';
+  document.getElementById('points').textContent = points;
+}
+
+function endGame() {
+  clearInterval(timer);
+  show('end');
+  document.getElementById('finalScore').textContent = points;
+  document.getElementById('stars').innerHTML = '⭐'.repeat(Math.min(3, Math.floor(points/40)));
+}
+
+function finishGame() {
+  clearInterval(timer);
+  show('finish');
+  document.getElementById('finalScore2').textContent = points;
+}
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+</script>
+</body>
+</html>
