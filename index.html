@@ -13,16 +13,33 @@ button { padding:12px 20px; font-size:16px; cursor:pointer; border:none; border-
 #bar { height:100%; width:0%; background:#22c55e; transition:width 0.1s; }
 #target { font-size:20px; margin-top:10px; }
 .star { color:gold; font-size:22px; }
+ul { text-align:left; display:inline-block; margin-top:20px; }
 </style>
 </head>
 <body>
 
+<!-- START SCREEN -->
 <div id="start" class="screen active">
   <h1>Fraction Flow</h1>
   <p>Control the flow and stop at the correct fraction!</p>
-  <button onclick="startGame()">Start Game</button>
+  <button onclick="showInstructions()">Start Game</button>
 </div>
 
+<!-- INSTRUCTION SCREEN (NEW) -->
+<div id="instruction" class="screen">
+  <h2>📋 How To Play</h2>
+  <ul>
+    <li>Hold the button to fill the bar.</li>
+    <li>Release when the bar matches the target fraction.</li>
+    <li>You have 30 seconds to score as many points as possible.</li>
+    <li>Each correct answer increases the level difficulty.</li>
+    <li>If you're within 5% of the correct value — you score!</li>
+  </ul>
+  <br><br>
+  <button onclick="startGame()">Begin Game</button>
+</div>
+
+<!-- GAME SCREEN -->
 <div id="game" class="screen">
   <div id="hud">
     <div>⏱ <span id="time">30</span></div>
@@ -39,6 +56,7 @@ button { padding:12px 20px; font-size:16px; cursor:pointer; border:none; border-
   <button onmousedown="fill=true" onmouseup="stopFill()">Hold to Fill</button>
 </div>
 
+<!-- END SCREEN -->
 <div id="end" class="screen">
   <h2>Time's Up!</h2>
   <p>Score: <span id="finalScore"></span></p>
@@ -46,6 +64,7 @@ button { padding:12px 20px; font-size:16px; cursor:pointer; border:none; border-
   <button onclick="location.reload()">Play Again</button>
 </div>
 
+<!-- FINISH SCREEN -->
 <div id="finish" class="screen">
   <h2>🎉 All Levels Completed!</h2>
   <p>Final Score: <span id="finalScore2"></span></p>
@@ -63,9 +82,16 @@ function randomFraction() {
   return { num, denom, value: (num/denom)*100 };
 }
 
+function showInstructions(){
+  show('instruction');
+}
+
 function startGame() {
   show('game');
+  time = 30;
+  document.getElementById('time').textContent = time;
   nextLevel();
+  
   timer = setInterval(() => {
     time--;
     document.getElementById('time').textContent = time;
@@ -91,6 +117,7 @@ setInterval(() => {
 function stopFill() {
   fill = false;
   let diff = Math.abs(width - targetFraction.value);
+  
   if (diff < 5) {
     points += 20;
     level++;
@@ -98,6 +125,7 @@ function stopFill() {
   } else {
     points = Math.max(0, points - 5);
   }
+  
   width = 0;
   document.getElementById('bar').style.width = '0%';
   document.getElementById('points').textContent = points;
@@ -121,5 +149,6 @@ function show(id) {
   document.getElementById(id).classList.add('active');
 }
 </script>
+
 </body>
 </html>
